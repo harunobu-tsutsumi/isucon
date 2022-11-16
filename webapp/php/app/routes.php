@@ -608,7 +608,7 @@ return function (App $app) {
             $stmt->execute([$estate->id]);
             $e = $stmt->fetchObject(Estate::class);
             if ($e) {
-                array_push($estatesInPolygon, $e);
+                $estatesInPolygon[] = $e;
             }
         }
 

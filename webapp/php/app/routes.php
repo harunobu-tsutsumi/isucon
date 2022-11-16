@@ -473,7 +473,8 @@ return function (App $app) {
         }
 
         if ($features = $queryParams['features'] ?? null) {
-            foreach (explode(',', $features) as $key => $feature) {
+            $featuresArray = explode(',', $features);
+            foreach ($featuresArray as $key => $feature) {
                 $name = sprintf(':feature_%s', $key);
                 $conditions[] = sprintf("features LIKE CONCAT('%%', %s, '%%')", $name);
                 $params[$name] = [$feature, PDO::PARAM_STR];

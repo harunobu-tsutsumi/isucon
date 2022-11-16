@@ -21,7 +21,7 @@ const NUM_NAZOTTE_LIMIT = 50;
 
 function getRange(RangeCondition $condition, string $rangeId): ?Range
 {
-    $id = intval($rangeId, 10);
+    $id = (int)($rangeId);
 
     foreach ($condition->ranges as $range) {
         if ($range->id == $id) {

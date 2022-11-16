@@ -20,7 +20,6 @@ CREATE TABLE isuumo.estate
     popularity  INTEGER             NOT NULL,
     INDEX index_popularity (popularity),
     INDEX index_rend (rent),
-    INDEX index_bounding (latitude, longitude),
     INDEX index_door (door_width, door_height)
 );
 

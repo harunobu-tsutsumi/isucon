@@ -328,7 +328,7 @@ return function (App $app) {
                 $stmt->bindValue(":thumbnail$i", trim($record[3] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":price$i", (int)trim($record[4] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":height$i", (int)trim($record[5] ?? null), PDO::PARAM_INT);
-                $stmt->bindValue(":width$i", (int)trim($record[6]) ?? null, PDO::PARAM_INT);
+                $stmt->bindValue(":width$i", (int)trim($record[6] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":depth$i", (int)trim($record[7] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":color$i", trim($record[8] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":features$i", trim($record[9] ?? null), PDO::PARAM_STR);
@@ -365,25 +365,31 @@ return function (App $app) {
         try {
             $pdo->beginTransaction();
 
-            foreach ($records as $record) {
-                $query = 'INSERT INTO estate VALUES(:id, :name, :description, :thumbnail, :address, :latitude, :longitude, :rent, :door_height, :door_width, :features, :popularity)';
-                $stmt = $pdo->prepare($query);
-                $stmt->execute([
-                    'id' => (int)trim($record[0] ?? null),
-                    'name' => trim($record[1] ?? null),
-                    'description' => trim($record[2] ?? null),
-                    'thumbnail' => trim($record[3] ?? null),
-                    'address' => trim($record[4] ?? null),
-                    'latitude' => (float)trim($record[5] ?? null),
-                    'longitude' => (float)trim($record[6] ?? null),
-                    'rent' => (int)trim($record[7] ?? null),
-                    'door_height' => (int)trim($record[8] ?? null),
-                    'door_width' => (int)trim($record[9] ?? null),
-                    'features' => trim($record[10] ?? null),
-                    'popularity' => (int)trim($record[11] ?? null),
-                ]);
+            $values = [];
+            foreach ($records as $i => $record) {
+                $values[] = "(:id$i, :name$i, :description$i, :thumbnail$i, "
+                    .":address$i, :latitude$i, :longitude$i, :rent$i, :door_height$i, "
+                    .":door_width$i, :features$i, :popularity$i)";
             }
 
+            $query = 'INSERT INTO estate VALUES ' . implode(',', $values);
+            $stmt = $pdo->prepare($query);
+
+            foreach ($records as $i => $record) {
+                $stmt->bindValue(":id$i", (int)trim($record[0] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":name$i", (string)trim($record[1] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":description$i", (string)trim($record[2] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":thumbnail$i", (string)trim($record[3] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":address$i", trim($record[4] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":latitude$i", (float)trim($record[5] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":longitude$i", (float)trim($record[6] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":rent$i", (int)trim($record[7] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":door_height$i", (int)trim($record[8] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":door_width$i", (int)trim($record[9] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":features$i", trim($record[10] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":popularity$i", (int)trim($record[11] ?? null), PDO::PARAM_INT);
+            }
+            $stmt->execute();
             $pdo->commit();
         } catch (PDOException $e) {
             $pdo->rollBack();

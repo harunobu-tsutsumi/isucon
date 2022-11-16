@@ -23,15 +23,9 @@ function getRange(RangeCondition $condition, string $rangeId): ?Range
 {
     $id = (int)($rangeId);
 
-    $func = function($obj) {
-        return $obj->id;
-    };
-
-    $array = array_map($func, $condition->ranges); //[0 -> id, 1 -> id]
-
-    foreach ($array as $key => $rangeId) {
-        if ($rangeId == $id) {
-            return $condition->ranges[$key];
+    foreach ($condition->ranges as $range) {
+        if ($range->id == $id) {
+            return $range;
         }
     }
 

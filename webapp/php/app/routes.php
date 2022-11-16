@@ -79,7 +79,9 @@ return function (App $app) {
         /** @var ChairSearchCondition */
         $chairSearchCondition = $this->get(ChairSearchCondition::class);
 
-        $priceRangeId = $request->getQueryParams()['priceRangeId'] ?? null;
+        $queryParams = $request->getQueryParams();
+
+        $priceRangeId = $queryParams['priceRangeId'] ?? null;
         if (is_numeric($priceRangeId)) {
             if (!$chairPrice = getRange($chairSearchCondition->price, $priceRangeId)) {
                 $this->get('logger')->info(sprintf('priceRangeId invalid, %s', $priceRangeId));
@@ -94,7 +96,7 @@ return function (App $app) {
                 $params[':maxPrice'] = [$chairPrice->max, PDO::PARAM_INT];
             }
         }
-        $heightRangeId = $request->getQueryParams()['heightRangeId'] ?? null;
+        $heightRangeId = $queryParams['heightRangeId'] ?? null;
         if (is_numeric($heightRangeId)) {
             if (!$chairHeight = getRange($chairSearchCondition->height, $heightRangeId)) {
                 $this->get('logger')->info(sprintf('heightRangeId invalid, %s', $heightRangeId));
@@ -109,7 +111,7 @@ return function (App $app) {
                 $params[':maxHeight'] = [$chairHeight->max, PDO::PARAM_INT];
             }
         }
-        $widthRangeId = $request->getQueryParams()['widthRangeId'] ?? null;
+        $widthRangeId = $queryParams['widthRangeId'] ?? null;
         if (is_numeric($widthRangeId)) {
             if (!$chairWidth = getRange($chairSearchCondition->width, $widthRangeId)) {
                 $this->get('logger')->info(sprintf('widthRangeId invalid, %s', $widthRangeId));
@@ -124,7 +126,7 @@ return function (App $app) {
                 $params[':maxWidth'] = [$chairWidth->max, PDO::PARAM_INT];
             }
         }
-        $depthRangeId = $request->getQueryParams()['depthRangeId'] ?? null;
+        $depthRangeId = $queryParams['depthRangeId'] ?? null;
         if (is_numeric($depthRangeId)) {
             if (!$chairDepth = getRange($chairSearchCondition->depth, $depthRangeId)) {
                 $this->get('logger')->info(sprintf('depthRangeId invalid, %s', $depthRangeId));
@@ -139,15 +141,15 @@ return function (App $app) {
                 $params[':maxDepth'] = [$chairDepth->max, PDO::PARAM_INT];
             }
         }
-        if ($kind = $request->getQueryParams()['kind'] ?? null) {
+        if ($kind = $queryParams['kind'] ?? null) {
             $conditions[] = 'kind = :kind';
             $params[':kind'] = [$kind, PDO::PARAM_STR];
         }
-        if ($color = $request->getQueryParams()['color'] ?? null) {
+        if ($color = $queryParams['color'] ?? null) {
             $conditions[] = 'color = :color';
             $params[':color'] = [$color, PDO::PARAM_STR];
         }
-        if ($features = $request->getQueryParams()['features'] ?? null) {
+        if ($features = $queryParams['features'] ?? null) {
             foreach (explode(',', $features) as $key => $feature) {
                 $name = sprintf(':feature_%s', $key);
                 $conditions[] = sprintf("features LIKE CONCAT('%%', %s, '%%')", $name);
@@ -162,11 +164,11 @@ return function (App $app) {
 
         $conditions[] = 'stock > 0';
 
-        if (is_null($page = $request->getQueryParams()['page'] ?? null)) {
+        if (is_null($page = $queryParams['page'] ?? null)) {
             $this->get('logger')->info(sprintf('Invalid format page parameter: %s', $page));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
-        if (is_null($perPage = $request->getQueryParams()['perPage'] ?? null)) {
+        if (is_null($perPage = $queryParams['perPage'] ?? null)) {
             $this->get('logger')->info(sprintf('Invalid format perPage parameter: %s', $perPage));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }

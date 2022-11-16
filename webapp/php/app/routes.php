@@ -158,7 +158,7 @@ return function (App $app) {
             }
         }
 
-        if (count($conditions) === 0) {
+        if (empty($conditions)) {
             $logger->info('Search condition not found');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
@@ -218,7 +218,7 @@ return function (App $app) {
         $stmt->execute();
         $chairs = $stmt->fetchAll(PDO::FETCH_CLASS, Chair::class);
 
-        if (count($chairs) === 0) {
+        if (empty($chairs)) {
             $this->get('logger')->error('getLowPricedChair not found');
             $response->getBody()->write(json_encode([
                 'chairs' => []
@@ -480,7 +480,7 @@ return function (App $app) {
             }
         }
 
-        if (count($conditions) === 0) {
+        if (empty($conditions)) {
             $this->get('logger')->info('Search condition not found');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
@@ -538,7 +538,7 @@ return function (App $app) {
         $stmt->execute();
         $estates = $stmt->fetchAll(PDO::FETCH_CLASS, Estate::class);
 
-        if (count($estates) === 0) {
+        if (empty($estates)) {
             $this->get('logger')->error('getLowPricedEstate not found');
             $response->getBody()->write(json_encode([
                 'chairs' => []
@@ -584,7 +584,7 @@ return function (App $app) {
             Coordinate::class . '::createFromJson',
             $json['coordinates']
         );
-        if (count($coordinates) === 0) {
+        if (empty($coordinates)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 

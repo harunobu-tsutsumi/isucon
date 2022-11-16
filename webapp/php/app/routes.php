@@ -153,7 +153,8 @@ return function (App $app) {
             }
         }
 
-        if (count($conditions) === 0) {
+
+        if (empty($conditions)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -210,7 +211,7 @@ return function (App $app) {
         $stmt->execute();
         $chairs = $stmt->fetchAll(PDO::FETCH_CLASS, Chair::class);
 
-        if (count($chairs) === 0) {
+        if (empty($chairs)) {
             $response->getBody()->write(json_encode([
                 'chairs' => []
             ]));
@@ -453,7 +454,8 @@ return function (App $app) {
             }
         }
 
-        if (count($conditions) === 0) {
+
+        if (empty($conditions)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -508,7 +510,7 @@ return function (App $app) {
         $stmt->execute();
         $estates = $stmt->fetchAll(PDO::FETCH_CLASS, Estate::class);
 
-        if (count($estates) === 0) {
+        if (empty($estates)) {
             $response->getBody()->write(json_encode([
                 'chairs' => []
             ]));
@@ -551,7 +553,7 @@ return function (App $app) {
             Coordinate::class . '::createFromJson',
             $json['coordinates']
         );
-        if (count($coordinates) === 0) {
+        if (empty($coordinates)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 

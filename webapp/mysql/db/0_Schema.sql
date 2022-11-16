@@ -19,8 +19,7 @@ CREATE TABLE isuumo.estate
     features    VARCHAR(64)         NOT NULL,
     popularity  INTEGER             NOT NULL,
     INDEX index_popularity (popularity),
-    INDEX index_rend (rent),
-    INDEX index_stock (stock)
+    INDEX index_rend (rent)
 );
 
 CREATE TABLE isuumo.chair

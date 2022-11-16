@@ -330,25 +330,32 @@ return function (App $app) {
         try {
             $pdo->beginTransaction();
 
-            foreach ($records as $record) {
-                $query = 'INSERT INTO chair VALUES(:id, :name, :description, :thumbnail, :price, :height, :width, :depth, :color, :features, :kind, :popularity, :stock)';
-                $stmt = $pdo->prepare($query);
-                $stmt->execute([
-                    ':id' => (int)trim($record[0] ?? null),
-                    ':name' => (string)trim($record[1] ?? null),
-                    ':description' => (string)trim($record[2] ?? null),
-                    ':thumbnail' => (string)trim($record[3] ?? null),
-                    ':price' => (int)trim($record[4] ?? null),
-                    ':height' => (int)trim($record[5] ?? null),
-                    ':width' => (int)trim($record[6]) ?? null,
-                    ':depth' => (int)trim($record[7] ?? null),
-                    ':color' => (string)trim($record[8] ?? null),
-                    ':features' => (string)trim($record[9] ?? null),
-                    ':kind' => (string)trim($record[10] ?? null),
-                    ':popularity' => (int)trim($record[11] ?? null),
-                    ':stock' => (int)trim($record[12] ?? null),
-                ]);
+            $values = [];
+            foreach ($records as $i => $record) {
+                $values[] = "(:id$i, :name$i, :description$i, :thumbnail$i, "
+                    .":price$i, :height$i, :width$i, :depth$i, :color$i, "
+                    .":features$i, :kind$i, :popularity$i, :stock$i)";
             }
+            $query = 'INSERT INTO chair VALUES ' . implode(',', $values);
+            $stmt = $pdo->prepare($query);
+
+            foreach ($records as $i => $record) {
+                $stmt->bindValue(":id$i", (int)trim($record[0] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":name$i", (string)trim($record[1] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":description$i", (string)trim($record[2] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":thumbnail$i", (string)trim($record[3] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":price$i", (int)trim($record[4] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":height$i", (int)trim($record[5] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":width$i", (int)trim($record[6]) ?? null, PDO::PARAM_INT);
+                $stmt->bindValue(":depth$i", (int)trim($record[7] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":color$i", (string)trim($record[8] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":features$i", (string)trim($record[9] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":kind$i", (string)trim($record[10] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":popularity$i", (int)trim($record[11] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":stock$i", (int)trim($record[12] ?? null), PDO::PARAM_INT);
+            }
+
+            $stmt->execute();
 
             $pdo->commit();
         } catch (PDOException $e) {

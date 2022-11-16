@@ -566,7 +566,8 @@ return function (App $app) {
         $boundingBox = BoundingBox::createFromCordinates($coordinates);
 
         $query = 'SELECT id, latitude, longitude FROM estate WHERE latitude <= ? AND latitude >= ? AND longitude <= ? AND longitude >= ? ORDER BY popularity DESC, id ASC';
-        $stmt = $this->get(PDO::class)->prepare($query);
+        $pdo = $this->get(PDO::class);
+        $stmt = $pdo->prepare($query);
         $stmt->execute([
             $boundingBox->bottomRightCorner->latitude,
             $boundingBox->topLeftCorner->latitude,
@@ -576,10 +577,11 @@ return function (App $app) {
         $estatesInBoundingBox = $stmt->fetchAll(PDO::FETCH_CLASS, Estate::class);
 
         $estatesInPolygon = Array();
+        $coordinateObject = Coordinate::toText($coordinates);
         foreach ($estatesInBoundingBox as $estate) {
             $point = sprintf("'POINT(%f %f)'", $estate->latitude, $estate->longitude);
-            $query = sprintf('SELECT * FROM estate WHERE id = ? AND ST_Contains(ST_PolygonFromText(%s), ST_GeomFromText(%s))', Coordinate::toText($coordinates), $point);
-            $stmt = $this->get(PDO::class)->prepare($query);
+            $query = sprintf('SELECT * FROM estate WHERE id = ? AND ST_Contains(ST_PolygonFromText(%s), ST_GeomFromText(%s))', $coordinateObject, $point);
+            $stmt = $pdo->prepare($query);
             $stmt->execute([$estate->id]);
             $e = $stmt->fetchObject(Estate::class);
             if ($e) {

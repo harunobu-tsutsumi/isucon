@@ -565,7 +565,7 @@ return function (App $app) {
 
         $boundingBox = BoundingBox::createFromCordinates($coordinates);
 
-        $query = 'SELECT * FROM estate WHERE latitude <= ? AND latitude >= ? AND longitude <= ? AND longitude >= ? ORDER BY popularity DESC, id ASC';
+        $query = 'SELECT id, latitude, longitude FROM estate WHERE latitude <= ? AND latitude >= ? AND longitude <= ? AND longitude >= ? ORDER BY popularity DESC, id ASC';
         $stmt = $this->get(PDO::class)->prepare($query);
         $stmt->execute([
             $boundingBox->bottomRightCorner->latitude,
@@ -584,11 +584,10 @@ return function (App $app) {
             $e = $stmt->fetchObject(Estate::class);
             if ($e) {
                 $estatesInPolygon[] = $e;
+                if (count($estatesInPolygon) >= NUM_NAZOTTE_LIMIT) {
+                    break;
+                }
             }
-        }
-
-        if (count($estatesInPolygon) > NUM_NAZOTTE_LIMIT) {
-            $estatesInPolygon = array_slice($estatesInPolygon, 0, NUM_NAZOTTE_LIMIT);
         }
 
         $response->getBody()->write(json_encode([

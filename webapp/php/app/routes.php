@@ -175,7 +175,7 @@ return function (App $app) {
         }
 
         $searchQuery = 'SELECT * FROM chair WHERE ';
-        $countQuery = 'SELECT COUNT(`id`) FROM chair WHERE ';
+        $countQuery = 'SELECT COUNT(*) FROM chair WHERE ';
         $searchCondition = implode(' AND ', $conditions);
         $limitOffset = ' ORDER BY popularity DESC, id ASC LIMIT :limit OFFSET :offset';
 
@@ -495,7 +495,7 @@ return function (App $app) {
         }
 
         $searchQuery = 'SELECT * FROM estate WHERE ';
-        $countQuery = 'SELECT COUNT(`id`) FROM estate WHERE ';
+        $countQuery = 'SELECT COUNT(*) FROM estate WHERE ';
         $searchCondition = implode(' AND ', $conditions);
         $limitOffset = ' ORDER BY popularity DESC, id ASC LIMIT :limit OFFSET :offset';
 

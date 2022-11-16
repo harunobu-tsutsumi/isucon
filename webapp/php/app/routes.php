@@ -380,7 +380,7 @@ return function (App $app) {
                 $stmt->bindValue(":name$i", (string)trim($record[1] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":description$i", (string)trim($record[2] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":thumbnail$i", (string)trim($record[3] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":address$i", trim($record[4] ?? null), PDO::PARAM_INT);
+                $stmt->bindValue(":address$i", trim($record[4] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":latitude$i", (float)trim($record[5] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":longitude$i", (float)trim($record[6] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":rent$i", (int)trim($record[7] ?? null), PDO::PARAM_INT);

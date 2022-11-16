@@ -153,7 +153,8 @@ return function (App $app) {
             }
         }
 
-        if (count($conditions) === 0) {
+
+        if (empty($conditions)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -210,7 +211,7 @@ return function (App $app) {
         $stmt->execute();
         $chairs = $stmt->fetchAll(PDO::FETCH_CLASS, Chair::class);
 
-        if (count($chairs) === 0) {
+        if (empty($chairs)) {
             $response->getBody()->write(json_encode([
                 'chairs' => []
             ]));
@@ -322,16 +323,16 @@ return function (App $app) {
 
             foreach ($records as $i => $record) {
                 $stmt->bindValue(":id$i", (int)trim($record[0] ?? null), PDO::PARAM_INT);
-                $stmt->bindValue(":name$i", (string)trim($record[1] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":description$i", (string)trim($record[2] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":thumbnail$i", (string)trim($record[3] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":name$i", trim($record[1] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":description$i", trim($record[2] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":thumbnail$i", trim($record[3] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":price$i", (int)trim($record[4] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":height$i", (int)trim($record[5] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":width$i", (int)trim($record[6] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":depth$i", (int)trim($record[7] ?? null), PDO::PARAM_INT);
-                $stmt->bindValue(":color$i", (string)trim($record[8] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":features$i", (string)trim($record[9] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":kind$i", (string)trim($record[10] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":color$i", trim($record[8] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":features$i", trim($record[9] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":kind$i", trim($record[10] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":popularity$i", (int)trim($record[11] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":stock$i", (int)trim($record[12] ?? null), PDO::PARAM_INT);
             }
@@ -451,14 +452,16 @@ return function (App $app) {
         }
 
         if ($features = $queryParams['features'] ?? null) {
-            foreach (explode(',', $features) as $key => $feature) {
+            $featuresArray = explode(',', $features);
+            foreach ($featuresArray as $key => $feature) {
                 $name = sprintf(':feature_%s', $key);
                 $conditions[] = sprintf("features LIKE CONCAT('%%', %s, '%%')", $name);
                 $params[$name] = [$feature, PDO::PARAM_STR];
             }
         }
 
-        if (count($conditions) === 0) {
+
+        if (empty($conditions)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -513,7 +516,7 @@ return function (App $app) {
         $stmt->execute();
         $estates = $stmt->fetchAll(PDO::FETCH_CLASS, Estate::class);
 
-        if (count($estates) === 0) {
+        if (empty($estates)) {
             $response->getBody()->write(json_encode([
                 'chairs' => []
             ]));
@@ -556,7 +559,7 @@ return function (App $app) {
             Coordinate::class . '::createFromJson',
             $json['coordinates']
         );
-        if (count($coordinates) === 0) {
+        if (empty($coordinates)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -580,7 +583,7 @@ return function (App $app) {
             $stmt->execute([$estate->id]);
             $e = $stmt->fetchObject(Estate::class);
             if ($e) {
-                array_push($estatesInPolygon, $e);
+                $estatesInPolygon[] = $e;
             }
         }
 

@@ -342,16 +342,16 @@ return function (App $app) {
 
             foreach ($records as $i => $record) {
                 $stmt->bindValue(":id$i", (int)trim($record[0] ?? null), PDO::PARAM_INT);
-                $stmt->bindValue(":name$i", (string)trim($record[1] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":description$i", (string)trim($record[2] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":thumbnail$i", (string)trim($record[3] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":name$i", trim($record[1] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":description$i", trim($record[2] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":thumbnail$i", trim($record[3] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":price$i", (int)trim($record[4] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":height$i", (int)trim($record[5] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":width$i", (int)trim($record[6]) ?? null, PDO::PARAM_INT);
                 $stmt->bindValue(":depth$i", (int)trim($record[7] ?? null), PDO::PARAM_INT);
-                $stmt->bindValue(":color$i", (string)trim($record[8] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":features$i", (string)trim($record[9] ?? null), PDO::PARAM_STR);
-                $stmt->bindValue(":kind$i", (string)trim($record[10] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":color$i", trim($record[8] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":features$i", trim($record[9] ?? null), PDO::PARAM_STR);
+                $stmt->bindValue(":kind$i", trim($record[10] ?? null), PDO::PARAM_STR);
                 $stmt->bindValue(":popularity$i", (int)trim($record[11] ?? null), PDO::PARAM_INT);
                 $stmt->bindValue(":stock$i", (int)trim($record[12] ?? null), PDO::PARAM_INT);
             }

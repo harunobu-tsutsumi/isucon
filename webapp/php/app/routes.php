@@ -82,9 +82,10 @@ return function (App $app) {
         $queryParams = $request->getQueryParams();
 
         $priceRangeId = $queryParams['priceRangeId'] ?? null;
+        $logger = $this->get('logger');
         if (is_numeric($priceRangeId)) {
             if (!$chairPrice = getRange($chairSearchCondition->price, $priceRangeId)) {
-                $this->get('logger')->info(sprintf('priceRangeId invalid, %s', $priceRangeId));
+                $logger->info(sprintf('priceRangeId invalid, %s', $priceRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairPrice->min != -1) {
@@ -99,7 +100,7 @@ return function (App $app) {
         $heightRangeId = $queryParams['heightRangeId'] ?? null;
         if (is_numeric($heightRangeId)) {
             if (!$chairHeight = getRange($chairSearchCondition->height, $heightRangeId)) {
-                $this->get('logger')->info(sprintf('heightRangeId invalid, %s', $heightRangeId));
+                $logger->info(sprintf('heightRangeId invalid, %s', $heightRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairHeight->min != -1) {
@@ -114,7 +115,7 @@ return function (App $app) {
         $widthRangeId = $queryParams['widthRangeId'] ?? null;
         if (is_numeric($widthRangeId)) {
             if (!$chairWidth = getRange($chairSearchCondition->width, $widthRangeId)) {
-                $this->get('logger')->info(sprintf('widthRangeId invalid, %s', $widthRangeId));
+                $logger->info(sprintf('widthRangeId invalid, %s', $widthRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairWidth->min != -1) {
@@ -129,7 +130,7 @@ return function (App $app) {
         $depthRangeId = $queryParams['depthRangeId'] ?? null;
         if (is_numeric($depthRangeId)) {
             if (!$chairDepth = getRange($chairSearchCondition->depth, $depthRangeId)) {
-                $this->get('logger')->info(sprintf('depthRangeId invalid, %s', $depthRangeId));
+                $logger->info(sprintf('depthRangeId invalid, %s', $depthRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairDepth->min != -1) {
@@ -158,18 +159,18 @@ return function (App $app) {
         }
 
         if (count($conditions) === 0) {
-            $this->get('logger')->info('Search condition not found');
+            $logger->info('Search condition not found');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         $conditions[] = 'stock > 0';
 
         if (is_null($page = $queryParams['page'] ?? null)) {
-            $this->get('logger')->info(sprintf('Invalid format page parameter: %s', $page));
+            $logger->info(sprintf('Invalid format page parameter: %s', $page));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
         if (is_null($perPage = $queryParams['perPage'] ?? null)) {
-            $this->get('logger')->info(sprintf('Invalid format perPage parameter: %s', $perPage));
+            $logger->info(sprintf('Invalid format perPage parameter: %s', $perPage));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 

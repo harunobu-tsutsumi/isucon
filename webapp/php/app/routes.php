@@ -60,7 +60,6 @@ return function (App $app) {
 
             system("bash -c \"$cmdStr\"", $result);
             if ($result !== EXEC_SUCCESS) {
-                $this->get('logger')->error('Initialize script error');
                 return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
             }
         }
@@ -82,10 +81,8 @@ return function (App $app) {
         $queryParams = $request->getQueryParams();
 
         $priceRangeId = $queryParams['priceRangeId'] ?? null;
-        $logger = $this->get('logger');
         if (is_numeric($priceRangeId)) {
             if (!$chairPrice = getRange($chairSearchCondition->price, $priceRangeId)) {
-                $logger->info(sprintf('priceRangeId invalid, %s', $priceRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairPrice->min != -1) {
@@ -100,7 +97,7 @@ return function (App $app) {
         $heightRangeId = $queryParams['heightRangeId'] ?? null;
         if (is_numeric($heightRangeId)) {
             if (!$chairHeight = getRange($chairSearchCondition->height, $heightRangeId)) {
-                $logger->info(sprintf('heightRangeId invalid, %s', $heightRangeId));
+
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairHeight->min != -1) {
@@ -115,7 +112,6 @@ return function (App $app) {
         $widthRangeId = $queryParams['widthRangeId'] ?? null;
         if (is_numeric($widthRangeId)) {
             if (!$chairWidth = getRange($chairSearchCondition->width, $widthRangeId)) {
-                $logger->info(sprintf('widthRangeId invalid, %s', $widthRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairWidth->min != -1) {
@@ -130,7 +126,6 @@ return function (App $app) {
         $depthRangeId = $queryParams['depthRangeId'] ?? null;
         if (is_numeric($depthRangeId)) {
             if (!$chairDepth = getRange($chairSearchCondition->depth, $depthRangeId)) {
-                $logger->info(sprintf('depthRangeId invalid, %s', $depthRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($chairDepth->min != -1) {
@@ -159,18 +154,15 @@ return function (App $app) {
         }
 
         if (count($conditions) === 0) {
-            $logger->info('Search condition not found');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         $conditions[] = 'stock > 0';
 
         if (is_null($page = $queryParams['page'] ?? null)) {
-            $logger->info(sprintf('Invalid format page parameter: %s', $page));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
         if (is_null($perPage = $queryParams['perPage'] ?? null)) {
-            $logger->info(sprintf('Invalid format perPage parameter: %s', $perPage));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -219,7 +211,6 @@ return function (App $app) {
         $chairs = $stmt->fetchAll(PDO::FETCH_CLASS, Chair::class);
 
         if (count($chairs) === 0) {
-            $this->get('logger')->error('getLowPricedChair not found');
             $response->getBody()->write(json_encode([
                 'chairs' => []
             ]));
@@ -247,7 +238,6 @@ return function (App $app) {
     $app->post('/api/chair/buy/{id}', function(Request $request, Response $response, array $args) {
         $id = $args['id'] ?? null;
         if (empty($id) || !is_numeric($id)) {
-            $this->get('logger')->info('post request document failed');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -262,7 +252,6 @@ return function (App $app) {
 
             if (!$chair) {
                 $pdo->rollBack();
-                $this->get('logger')->info(sprintf('buyChair chair id "%s" not found', $id));
                 return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
             }
 
@@ -270,14 +259,12 @@ return function (App $app) {
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             if (!$stmt->execute()) {
                 $pdo->rollBack();
-                $this->get('logger')->error('chair stock update failed');
                 return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
             }
 
             $pdo->commit();
         } catch (PDOException $e) {
             $pdo->rollBack();
-            $this->get('logger')->error(sprintf('DB Execution Error: on getting a chair by id : %s', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -287,7 +274,6 @@ return function (App $app) {
     $app->get('/api/chair/{id}', function(Request $request, Response $response, array $args) {
         $id = $args['id'] ?? null;
         if (empty($id) || !is_numeric($id)) {
-            $this->get('logger')->error(sprintf('Request parameter \"id\" parse error : %s', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -297,13 +283,10 @@ return function (App $app) {
         $chair = $stmt->fetchObject(Chair::class);
 
         if (!$chair) {
-            $this->get('logger')->error(sprintf('requested id\'s chair not found : %s', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         } elseif (!$chair instanceof Chair) {
-            $this->get('logger')->error(sprintf('Failed to get the chair from id : %s', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         } elseif ($chair->getStock() <= 0) {
-            $this->get('logger')->error(sprintf('requested id\'s chair is sold out : %s', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
@@ -314,15 +297,12 @@ return function (App $app) {
 
     $app->post('/api/chair', function (Request $request, Response $response) {
         if (!$file = $request->getUploadedFiles()['chairs'] ?? null) {
-            $this->get('logger')->error('failed to get form file');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         } elseif (!$file instanceof Slim\Psr7\UploadedFile || $file->getError() !== UPLOAD_ERR_OK) {
-            $this->get('logger')->error('failed to get form file');
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         if (!$records = Reader::createFromPath($file->getFilePath())) {
-            $this->get('logger')->error('failed to read csv');
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -361,7 +341,6 @@ return function (App $app) {
             $pdo->commit();
         } catch (PDOException $e) {
             $pdo->rollBack();
-            $this->get('logger')->error(sprintf('failed to insert chair: %s', $e->getMessage()));
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -371,15 +350,12 @@ return function (App $app) {
     // Estate
     $app->post('/api/estate', function(Request $request, Response $response) {
         if (!$file = $request->getUploadedFiles()['estates'] ?? null) {
-            $this->get('logger')->error('failed to get form file');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         } elseif (!$file instanceof Slim\Psr7\UploadedFile || $file->getError() !== UPLOAD_ERR_OK) {
-            $this->get('logger')->error('failed to get form file');
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         if (!$records = Reader::createFromPath($file->getFilePath())) {
-            $this->get('logger')->error('failed to read csv');
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -410,7 +386,6 @@ return function (App $app) {
             $pdo->commit();
         } catch (PDOException $e) {
             $pdo->rollBack();
-            $this->get('logger')->error(sprintf('failed to insert estate: %s', $e->getMessage()));
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -429,7 +404,6 @@ return function (App $app) {
         $doorHeightRangeId = $queryParams['doorHeightRangeId'] ?? null;
         if (is_numeric($doorHeightRangeId)) {
             if (!$doorHeight = getRange($estateSearchCondition->doorHeight, $doorHeightRangeId)) {
-                $this->get('logger')->info(sprintf('doorHeightRangeId invalid, %s', $doorHeightRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($doorHeight->min != -1) {
@@ -444,7 +418,6 @@ return function (App $app) {
         $doorWidthRangeId = $queryParams['doorWidthRangeId'] ?? null;
         if (is_numeric($doorWidthRangeId)) {
             if (!$doorWidth = getRange($estateSearchCondition->doorWidth, $doorWidthRangeId)) {
-                $this->get('logger')->info(sprintf('doorWidthRangeId invalid, %s', $doorWidthRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($doorWidth->min != -1) {
@@ -459,7 +432,6 @@ return function (App $app) {
         $rentRangeId = $queryParams['rentRangeId'] ?? null;
         if (is_numeric($rentRangeId)) {
             if (!$estateRent = getRange($estateSearchCondition->rent, $rentRangeId)) {
-                $this->get('logger')->info(sprintf('rentRangeId invalid, %s', $rentRangeId));
                 return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             if ($estateRent->min != -1) {
@@ -481,16 +453,13 @@ return function (App $app) {
         }
 
         if (count($conditions) === 0) {
-            $this->get('logger')->info('Search condition not found');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         if (is_null($page = $queryParams['page'] ?? null)) {
-            $this->get('logger')->info(sprintf('Invalid format page parameter: %s', $page));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
         if (is_null($perPage = $queryParams['perPage'] ?? null)) {
-            $this->get('logger')->info(sprintf('Invalid format perPage parameter: %s', $perPage));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -539,7 +508,6 @@ return function (App $app) {
         $estates = $stmt->fetchAll(PDO::FETCH_CLASS, Estate::class);
 
         if (count($estates) === 0) {
-            $this->get('logger')->error('getLowPricedEstate not found');
             $response->getBody()->write(json_encode([
                 'chairs' => []
             ]));
@@ -561,7 +529,6 @@ return function (App $app) {
     $app->post('/api/estate/req_doc/{id}', function(Request $request, Response $response, array $args) {
         $id = $args['id'] ?? null;
         if (empty($id) || !is_numeric($id)) {
-            $this->get('logger')->error(sprintf('Request parameter "id" parse error : %s', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -571,14 +538,13 @@ return function (App $app) {
         $estate = $stmt->fetchObject(Estate::class);
 
         if (!$estate) {
-            $this->get('logger')->error(sprintf('requested id\'s estate not found : %s', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
         return $response->withStatus(StatusCodeInterface::STATUS_OK);
     });
 
-    $app->post('/api/estate/nazotte', function(request $request, Response $response) {
+    $app->post('/api/estate/nazotte', function(Request $request, Response $response) {
         $json = json_decode($request->getBody()->getContents(), true);
         $coordinates = array_map(
             Coordinate::class . '::createFromJson',
@@ -638,7 +604,6 @@ return function (App $app) {
     $app->get('/api/recommended_estate/{id}', function(Request $request, Response $response, array $args) {
         $id = $args['id'] ?? null;
         if (empty($id) || !is_numeric($id)) {
-            $this->get('logger')->info('post request document failed');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -648,7 +613,6 @@ return function (App $app) {
         $chair = $stmt->fetchObject(Chair::class);
 
         if (!$chair) {
-            $this->get('logger')->info(sprintf('Requested chair id "%s" not found', $id));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
@@ -676,7 +640,6 @@ return function (App $app) {
     $app->get('/api/estate/{id}', function(Request $request, Response $response, array $args) {
         $id = $args['id'] ?? null;
         if (empty($id) || !is_numeric($id)) {
-            $this->get('logger')->info('Request parameter "id" parse error');
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 

@@ -413,10 +413,12 @@ return function (App $app) {
         $conditions = [];
         $params = [];
 
+        $queryParams = $request->getQueryParams();
+
         /** @var EstateSearchCondition */
         $estateSearchCondition = $this->get(EstateSearchCondition::class);
 
-        $doorHeightRangeId = $request->getQueryParams()['doorHeightRangeId'] ?? null;
+        $doorHeightRangeId = $queryParams['doorHeightRangeId'] ?? null;
         if (is_numeric($doorHeightRangeId)) {
             if (!$doorHeight = getRange($estateSearchCondition->doorHeight, $doorHeightRangeId)) {
                 $this->get('logger')->info(sprintf('doorHeightRangeId invalid, %s', $doorHeightRangeId));
@@ -431,7 +433,7 @@ return function (App $app) {
                 $params[':maxDoorHeight'] = [$doorHeight->max, PDO::PARAM_INT];
             }
         }
-        $doorWidthRangeId = $request->getQueryParams()['doorWidthRangeId'] ?? null;
+        $doorWidthRangeId = $queryParams['doorWidthRangeId'] ?? null;
         if (is_numeric($doorWidthRangeId)) {
             if (!$doorWidth = getRange($estateSearchCondition->doorWidth, $doorWidthRangeId)) {
                 $this->get('logger')->info(sprintf('doorWidthRangeId invalid, %s', $doorWidthRangeId));
@@ -446,7 +448,7 @@ return function (App $app) {
                 $params[':maxDoorWidth'] = [$doorWidth->max, PDO::PARAM_INT];
             }
         }
-        $rentRangeId = $request->getQueryParams()['rentRangeId'] ?? null;
+        $rentRangeId = $queryParams['rentRangeId'] ?? null;
         if (is_numeric($rentRangeId)) {
             if (!$estateRent = getRange($estateSearchCondition->rent, $rentRangeId)) {
                 $this->get('logger')->info(sprintf('rentRangeId invalid, %s', $rentRangeId));
@@ -462,7 +464,7 @@ return function (App $app) {
             }
         }
 
-        if ($features = $request->getQueryParams()['features'] ?? null) {
+        if ($features = $queryParams['features'] ?? null) {
             foreach (explode(',', $features) as $key => $feature) {
                 $name = sprintf(':feature_%s', $key);
                 $conditions[] = sprintf("features LIKE CONCAT('%%', %s, '%%')", $name);
@@ -475,11 +477,11 @@ return function (App $app) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
-        if (is_null($page = $request->getQueryParams()['page'] ?? null)) {
+        if (is_null($page = $queryParams['page'] ?? null)) {
             $this->get('logger')->info(sprintf('Invalid format page parameter: %s', $page));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }
-        if (is_null($perPage = $request->getQueryParams()['perPage'] ?? null)) {
+        if (is_null($perPage = $queryParams['perPage'] ?? null)) {
             $this->get('logger')->info(sprintf('Invalid format perPage parameter: %s', $perPage));
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
         }

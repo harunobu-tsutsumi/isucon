@@ -544,7 +544,7 @@ return function (App $app) {
         return $response->withStatus(StatusCodeInterface::STATUS_OK);
     });
 
-    $app->post('/api/estate/nazotte', function(request $request, Response $response) {
+    $app->post('/api/estate/nazotte', function(Request $request, Response $response) {
         $json = json_decode($request->getBody()->getContents(), true);
         $coordinates = array_map(
             Coordinate::class . '::createFromJson',
@@ -601,7 +601,7 @@ return function (App $app) {
         return $response->withHeader('Content-Type', 'application/json');
     });
 
-    $app->get('/api/recommended_estate/{id}', function(Response $response, array $args) {
+    $app->get('/api/recommended_estate/{id}', function(Request $request, Response $response, array $args) {
         $id = $args['id'] ?? null;
         if (empty($id) || !is_numeric($id)) {
             return $response->withStatus(StatusCodeInterface::STATUS_BAD_REQUEST);
